@@ -11,11 +11,23 @@
 		"AzureBlobStorage2_connectionString": {
 			"value": ""
 		},
+		"AzureBlobStorage3_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage4_connectionString": {
+			"value": ""
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
 		"SqlServer1_password": {
 			"value": ""
 		},
 		"lsadls_accountKey": {
 			"value": ""
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://sgdevppadls.dfs.core.windows.net/"
 		},
 		"SqlServer1_properties_typeProperties_server": {
 			"value": "DESKTOP-NSEJDBC\\MSSQL_DEV_2019"
