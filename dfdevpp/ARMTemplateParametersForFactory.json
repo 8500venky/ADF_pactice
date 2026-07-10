@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "dfdevpp"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage2_connectionString": {
+			"value": ""
+		},
+		"SqlServer1_password": {
+			"value": ""
+		},
+		"lsadls_accountKey": {
+			"value": ""
+		},
+		"SqlServer1_properties_typeProperties_server": {
+			"value": "DESKTOP-NSEJDBC\\MSSQL_DEV_2019"
+		},
+		"SqlServer1_properties_typeProperties_database": {
+			"value": "hevofinal1"
+		},
+		"SqlServer1_properties_typeProperties_userName": {
+			"value": "venky1"
+		},
+		"lsadls_properties_typeProperties_url": {
+			"value": "https://sgdevppadls.dfs.core.windows.net/"
+		}
+	}
+}
