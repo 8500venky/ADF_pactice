@@ -172,11 +172,17 @@
 					"storedProcedureName": "[dbo].[usp_UpdateWatermark]",
 					"storedProcedureParameters": {
 						"TableName": {
-							"value": "@pipeline().parameters.TableName",
+							"value": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"Watermark": {
-							"value": "@variables('PipelineStartTime')",
+							"value": {
+								"value": "@variables('PipelineStartTime')",
+								"type": "Expression"
+							},
 							"type": "DateTime"
 						}
 					}
@@ -209,7 +215,10 @@
 					"storedProcedureName": "[dbo].[usp_InsertRunLog]",
 					"storedProcedureParameters": {
 						"EndTime": {
-							"value": "@utcNow()",
+							"value": {
+								"value": "@utcNow()",
+								"type": "Expression"
+							},
 							"type": "DateTime"
 						},
 						"ErrorMessage": {
@@ -217,19 +226,31 @@
 							"type": "String"
 						},
 						"RowsCopied": {
-							"value": "@activity('CPY_IncrementalData').output.rowsCopied",
+							"value": {
+								"value": "@activity('CPY_IncrementalData').output.rowsCopied",
+								"type": "Expression"
+							},
 							"type": "Int32"
 						},
 						"StartTime": {
-							"value": "@variables('PipelineStartTime')",
+							"value": {
+								"value": "@variables('PipelineStartTime')",
+								"type": "Expression"
+							},
 							"type": "DateTime"
 						},
 						"Status": {
-							"value": "@string('Success')",
+							"value": {
+								"value": "@string('Success')",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"TableName": {
-							"value": "@pipeline().parameters.TableName",
+							"value": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							},
 							"type": "String"
 						}
 					}
