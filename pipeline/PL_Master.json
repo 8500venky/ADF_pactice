@@ -63,12 +63,18 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"TableName": "@item().TableName",
+									"TableName": {
+										"value": "@item().TableName",
+										"type": "Expression"
+									},
 									"CreatedColumn": {
 										"value": "@item().CreatedColumn",
 										"type": "Expression"
 									},
-									"ModifiedColumn": "@item().ModifiedColumn"
+									"ModifiedColumn": {
+										"value": "@item().ModifiedColumn",
+										"type": "Expression"
+									}
 								}
 							}
 						}
