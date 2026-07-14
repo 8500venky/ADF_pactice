@@ -1,0 +1,33 @@
+{
+	"name": "DS_SQL_Metadata",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQL_PinePerks",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "TableName",
+				"type": "varchar"
+			},
+			{
+				"name": "IsActive",
+				"type": "bit"
+			},
+			{
+				"name": "CreatedColumn",
+				"type": "varchar"
+			},
+			{
+				"name": "ModifiedColumn",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "ETL_TableList"
+		}
+	}
+}

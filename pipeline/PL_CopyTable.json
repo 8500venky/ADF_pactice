@@ -1,0 +1,264 @@
+{
+	"name": "PL_CopyTable",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set_PipelineStartTime",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "PipelineStartTime",
+					"value": {
+						"value": "@formatDateTime(utcNow(),'yyyy-MM-dd HH:mm:ss')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "LKP_GetWatermark",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set_PipelineStartTime",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "@concat(\n'SELECT WatermarkValue\nFROM dbo.ETL_Watermark\nWHERE TableName = ''',\npipeline().parameters.TableName,\n''''\n)\n",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_SQL_Watermark",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "CPY_IncrementalData",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Set_SourceQuery",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "@variables('SourceQuery')",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_SQL_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"TableName": {
+								"value": "@pipeline().parameters.TableName",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_ADLS_Parquet1",
+						"type": "DatasetReference",
+						"parameters": {
+							"FolderName": "@concat( pipeline().parameters.TableName, '/', formatDateTime(variables('PipelineStartTime'),'yyyy'), '/', formatDateTime(variables('PipelineStartTime'),'MM'), '/', formatDateTime(variables('PipelineStartTime'),'dd') )",
+							"FileName": "@concat( pipeline().parameters.TableName, '.parquet' )"
+						}
+					}
+				]
+			},
+			{
+				"name": "Set_SourceQuery",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LKP_GetWatermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "SourceQuery",
+					"value": {
+						"value": "@if(\n    equals(\n        formatDateTime(\n            activity('LKP_GetWatermark').output.firstRow.WatermarkValue,\n            'yyyy-MM-dd HH:mm:ss'\n        ),\n        '1900-01-01 00:00:00'\n    ),\n\n    concat(\n        'SELECT * FROM dbo.',\n        pipeline().parameters.TableName\n    ),\n\n    concat(\n        'SELECT * FROM dbo.',\n        pipeline().parameters.TableName,\n        ' WHERE (',\n        pipeline().parameters.CreatedColumn,\n        ' > ''',\n        formatDateTime(\n            activity('LKP_GetWatermark').output.firstRow.WatermarkValue,\n            'yyyy-MM-dd HH:mm:ss'\n        ),\n        ''' OR ',\n        pipeline().parameters.ModifiedColumn,\n        ' > ''',\n        formatDateTime(\n            activity('LKP_GetWatermark').output.firstRow.WatermarkValue,\n            'yyyy-MM-dd HH:mm:ss'\n        ),\n        ''') AND COALESCE(',\n        pipeline().parameters.ModifiedColumn,\n        ',',\n        pipeline().parameters.CreatedColumn,\n        ') <= ''',\n        variables('PipelineStartTime'),\n        ''''\n    )\n)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SP_UpdateWatermark",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "CPY_IncrementalData",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_UpdateWatermark]",
+					"storedProcedureParameters": {
+						"TableName": {
+							"value": "@pipeline().parameters.TableName",
+							"type": "String"
+						},
+						"Watermark": {
+							"value": "@variables('PipelineStartTime')",
+							"type": "DateTime"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_PinePerks",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "SP_InsertRunLog",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "SP_UpdateWatermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_InsertRunLog]",
+					"storedProcedureParameters": {
+						"EndTime": {
+							"value": "@utcNow()",
+							"type": "DateTime"
+						},
+						"ErrorMessage": {
+							"value": null,
+							"type": "String"
+						},
+						"RowsCopied": {
+							"value": "@activity('CPY_IncrementalData').output.rowsCopied",
+							"type": "Int32"
+						},
+						"StartTime": {
+							"value": "@variables('PipelineStartTime')",
+							"type": "DateTime"
+						},
+						"Status": {
+							"value": "@string('Success')",
+							"type": "String"
+						},
+						"TableName": {
+							"value": "@pipeline().parameters.TableName",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "LS_SQL_PinePerks",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			},
+			"CreatedColumn": {
+				"type": "string"
+			},
+			"ModifiedColumn": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"PipelineStartTime": {
+				"type": "String"
+			},
+			"SourceQuery": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
