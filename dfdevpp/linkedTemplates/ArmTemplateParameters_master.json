@@ -20,6 +20,12 @@
 		"AzureDataLakeStorage1_accountKey": {
 			"value": ""
 		},
+		"LS_ADLS_Parquet_accountKey": {
+			"value": ""
+		},
+		"LS_SQL_PinePerks_password": {
+			"value": ""
+		},
 		"SqlServer1_password": {
 			"value": ""
 		},
@@ -29,11 +35,23 @@
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"value": "https://sgdevppadls.dfs.core.windows.net/"
 		},
+		"LS_ADLS_Parquet_properties_typeProperties_url": {
+			"value": "https://sgdevppadls.dfs.core.windows.net/"
+		},
+		"LS_SQL_PinePerks_properties_typeProperties_server": {
+			"value": "DESKTOP-NSEJDBC\\MSSQL_DEV_2019"
+		},
+		"LS_SQL_PinePerks_properties_typeProperties_database": {
+			"value": "pineperks"
+		},
+		"LS_SQL_PinePerks_properties_typeProperties_userName": {
+			"value": "venky1"
+		},
 		"SqlServer1_properties_typeProperties_server": {
 			"value": "DESKTOP-NSEJDBC\\MSSQL_DEV_2019"
 		},
 		"SqlServer1_properties_typeProperties_database": {
-			"value": "hevofinal1"
+			"value": "Pineperks"
 		},
 		"SqlServer1_properties_typeProperties_userName": {
 			"value": "venky1"
