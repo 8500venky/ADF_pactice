@@ -1,0 +1,21 @@
+{
+	"name": "DS_SQL_Source",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQL_PinePerks",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "DimCustomer"
+		}
+	}
+}

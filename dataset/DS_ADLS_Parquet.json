@@ -1,0 +1,19 @@
+{
+	"name": "DS_ADLS_Parquet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_ADLS_Parquet",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileSystem": "sqlmigration"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
